@@ -1,4 +1,5 @@
 from enum import Enum
+from pathlib import Path
 from country import Country
 
 
@@ -64,6 +65,27 @@ class Province:
             controller = owner
         self.controller: Tag = controller
 
+    @classmethod
+    def from_txt(cls, filename: Path):
+        with open(filename, 'r') as f:
+            lines = f.readlines()
+                        
+            owner: Tag
+            capital: str
+            culture: Culture
+            trade_goods: TradeGood
+            religion: Religion
+            tax: int
+            production: int
+            manpower: int
+            centre_of_trade: int
+            discovered_by: list[CultureGroup]
+            hre: bool = False
+            add_cores: list[Tag] = None
+            buildings: list[Building] = None
+            is_city: bool = True
+            controller: Tag | None = None
+            
 
 class Map:
     def __init__(self, provinces: list[Province], countries: list[Country]):
