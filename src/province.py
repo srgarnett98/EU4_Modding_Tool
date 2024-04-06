@@ -1,3 +1,4 @@
+from __future__ import annotations
 from enum import Enum
 from pathlib import Path
 import re
@@ -80,7 +81,7 @@ class Province:
         self.controller: Tag = controller
 
     @classmethod
-    def from_txt(cls, filename: Path):
+    def from_txt(cls, filename: Path)->Province:
         owner = None
         capital = None
         culture = None
