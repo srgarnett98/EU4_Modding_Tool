@@ -2,12 +2,11 @@ from enum import Enum
 
 class TechGroup(Enum):
     EAST_AFRICAN = 'east_african'
-    
-class UnitType(Enum):
-    ...
 
 class GovType(Enum):
-    ...
+    MONARCHY = "monarchy"
+    REPUBLIC = "republic"
+    THEOCRACY = "theocracy"
     
 class Tag(Enum):
     SWE = "SWE"

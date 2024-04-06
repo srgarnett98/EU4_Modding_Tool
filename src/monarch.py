@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional
 
@@ -21,9 +22,21 @@ class Monarch():
     
     leader: Optional[Leader]
     
+    @classmethod
+    def from_list_of_lines(cls, lines: list[str])->Monarch:
+        ...
+    
 class Heir(Monarch):
     claim: int
     monarch_name: str
 
+    @classmethod
+    def from_list_of_lines(cls, lines: list[str])->Heir:
+        ...
+
 class Queen(Monarch):
     country_of_origin: Tag
+    
+    @classmethod
+    def from_list_of_lines(cls, lines: list[str])->Queen:
+        ...
