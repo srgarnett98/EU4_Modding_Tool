@@ -4,7 +4,7 @@ class Date:
         self.mo:int = mo
         self.day:int = day
     
-    def to_str(self):
+    def to_str(self)-> str:
         return str(self.yr) +"." + str(self.mo) + "." + str(self.day)
     
 START_DATE = Date(1444, 11, 11)
