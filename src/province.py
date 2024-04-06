@@ -81,7 +81,7 @@ class Province:
         self.controller: Tag = controller
 
     @classmethod
-    def from_txt(cls, filename: Path)->Province:
+    def from_txt(cls, filename: Path) -> Province:
         owner = None
         capital = None
         culture = None
@@ -167,23 +167,23 @@ class Province:
             raise ValueError("production not found in province.txt")
         if manpower is None:
             raise ValueError("manpower not found in province.txt")
-        
+
         return cls(
-            owner = owner,
-            capital = capital,
-            culture = culture,
-            trade_goods = trade_goods,
-            religion = religion,
-            tax = tax,
-            production = production,
-            manpower = manpower,
-            discovered_by = discovered_by,
-            center_of_trade = center_of_trade,
-            hre = hre,
-            add_cores = add_cores,
-            buildings = buildings,
-            is_city = is_city,
-            controller = controller,
+            owner=owner,
+            capital=capital,
+            culture=culture,
+            trade_goods=trade_goods,
+            religion=religion,
+            tax=tax,
+            production=production,
+            manpower=manpower,
+            discovered_by=discovered_by,
+            center_of_trade=center_of_trade,
+            hre=hre,
+            add_cores=add_cores,
+            buildings=buildings,
+            is_city=is_city,
+            controller=controller,
         )
 
     def to_txt(self, filename: Path):
@@ -192,7 +192,9 @@ class Province:
             f.write("controller = {}\n".format(self.controller.value))
             f.write('capital = "{}"\n'.format(self.capital))
             f.write(
-                "is_city = {}\n".format("yes" * self.is_city + "no" * (not self.is_city))
+                "is_city = {}\n".format(
+                    "yes" * self.is_city + "no" * (not self.is_city)
+                )
             )
             f.write("culture = {}\n".format(self.culture.value))
             f.write("religion = {}\n".format(self.religion.value))
@@ -210,4 +212,3 @@ class Province:
                 f.write("discovered_by = {}\n".format(group.value))
             if self.hre:
                 f.write("hre = yes")
-            
