@@ -10,6 +10,7 @@ from src.enums import Culture, GovType, Religion, Tag, TechGroup
 
 @dataclass
 class CountryEffect:
+    date: Date
     add_prestige: Optional[int]
     add_treasury: Optional[int]
 
@@ -17,18 +18,36 @@ class CountryEffect:
     def from_list_of_lines(cls, lines: list[str])->CountryEffect:
         add_prestige = None
         add_treasury = None
+        date = None
         
         for line in lines:
+            if re.search(r"1\d\d\d\.\d+\.\d+", line):
+                yr = int(re.findall(r"(\d\d\d\d)\.\d+\.\d+", line)[0])
+                mo = int(re.findall(r"\d\d\d\d\.(\d+)\.\d+", line)[0])
+                day = int(re.findall(r"\d\d\d\d\.\d+\.(\d+)", line)[0])
+                date = Date(yr, mo, day)
             if "add_prestige" in line:
                 add_prestige = int(re.findall(r"= (-*\d+)", line)[0])
             elif "add_treasury" in line:
                 add_treasury = int(re.findall(r"= (-*\d+)", line)[0])
 
+        if date is None: raise ValueError("Date not passed to CountryEffect")
         return cls(
+            date = date,
             add_prestige = add_prestige,
             add_treasury = add_treasury,
         )
         
+    def to_txt_block(self)->list[str]:
+        lines = []
+        lines.append(self.date.to_str() + "{\n")
+        if self.add_prestige is not None:
+            lines.append("\tadd_prestige = {}\n".format(self.add_prestige))
+        if self.add_treasury is not None:
+            lines.append("\tadd_prestige = {}\n".format(self.add_prestige))
+        lines.append("}\n")
+        return lines
+            
 class Country:
     def __init__(
         self,
@@ -49,7 +68,7 @@ class Country:
         removed_cultures: Optional[list[Culture]],
         historical_friends: Optional[list[Tag]],
         historical_rivals: Optional[list[Tag]],
-        starting_state: dict[Date, CountryEffect],
+        starting_state: Optional[list[CountryEffect]],
     ):
         self.tag: Tag = tag
         self.technology_group: TechGroup = technology_group
@@ -66,18 +85,19 @@ class Country:
         self.army_profesh: Optional[float] = army_profesh
         if accepted_cultures is None:
             accepted_cultures = []
-        self.accepted_cultures: Optional[list[Culture]] = accepted_cultures
+        self.accepted_cultures: list[Culture] = accepted_cultures
         if removed_cultures is None:
             removed_cultures = []
-        self.removed_cultures: Optional[list[Culture]] = removed_cultures
+        self.removed_cultures: list[Culture] = removed_cultures
         if historical_friends is None:
-            []
-        self.historical_friends: Optional[list[Tag]] = historical_friends
+            historical_friends = []
+        self.historical_friends: list[Tag] = historical_friends
         if historical_rivals is None:
             historical_rivals = []
-        self.historical_rivals: Optional[list[Tag]] = historical_rivals
-
-        self.starting_state: dict[Date, CountryEffect] = starting_state
+        self.historical_rivals: list[Tag] = historical_rivals
+        if starting_state is None:
+            starting_state = []
+        self.starting_state: list[CountryEffect] = starting_state
 
     @classmethod
     def from_txt(cls, filename: Path) -> Country:
@@ -100,7 +120,7 @@ class Country:
         removed_cultures: Optional[list[Culture]] = []
         historical_friends: Optional[list[Tag]] = []
         historical_rivals: Optional[list[Tag]] = []
-        starting_state: dict[Date, CountryEffect] = {}
+        starting_state: list[CountryEffect] = []
 
         with open(filename, "r") as f:
             lines = f.readlines()
@@ -172,7 +192,7 @@ class Country:
                         while not lines[j].startswith("}"):
                             state_lines.append(lines[j])
                             j += 1
-                        starting_state[START_DATE] = CountryEffect.from_list_of_lines(state_lines)
+                        starting_state.append(CountryEffect.from_list_of_lines(state_lines))
 
         if technology_group is None:
             raise ValueError("technology_group not found in province.txt")
@@ -207,3 +227,46 @@ class Country:
             historical_rivals=historical_rivals,
             starting_state=starting_state,
         )
+
+
+    def to_txt(self, filename: Path):
+        # lets just assert that you're naming it with the ID in front
+        stem = filename.stem
+        tag = re.findall(r'(...)[ ]*-[ ]*', stem)[0]
+        assert Tag(tag) == self.tag
+        
+        with open(filename, "w") as f:
+            f.write("technology_group = {}\n".format(self.technology_group.value))
+            f.write("government = {}\n".format(self.gov_type.value))
+            f.write("government_rank = {}\n".format(str(self.gov_rank)))
+            f.write("primary_culture = {}\n".format(self.primary_culture.value))
+            f.write("religion = {}\n".format(self.religion.value))
+            for culture in self.accepted_cultures:
+                f.write("add_accepted_culture = {}\n".format(culture.value))
+            for culture in self.removed_cultures:
+                f.write("remove_accepted_culture = {}\n".format(culture.value))
+            for friend in self.historical_friends:
+                f.write("historical_friend = {}\n".format(friend.value))
+            for rival in self.historical_rivals:
+                f.write("historical_rival = {}\n".format(rival.value))
+            if self.mercantilism is not None:
+                f.write("mercantilism = {}\n".format(self.mercantilism))
+            if self.army_profesh is not None:
+                f.write("add_army_professionalism = {0:.2f}\n".format(self.army_profesh))
+            f.write("capital = {}".format(self.capital))
+            if self.monarch is not None:
+                monarch_block = self.monarch.to_txt_block()
+                for line in monarch_block:
+                    f.write(line)
+            if self.heir is not None:
+                heir_block = self.heir.to_txt_block()
+                for line in heir_block:
+                    f.write(line)
+            if self.queen is not None:
+                queen_block = self.queen.to_txt_block()
+                for line in queen_block:
+                    f.write(line)
+            for country_effect in self.starting_state:
+                effect_block = country_effect.to_txt_block()
+                for line in effect_block:
+                    f.write(line)
