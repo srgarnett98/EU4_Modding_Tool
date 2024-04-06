@@ -1,15 +1,12 @@
 from enum import Enum
 
 class TechGroup(Enum):
-    ...
+    EAST_AFRICAN = 'east_african'
     
 class UnitType(Enum):
     ...
 
 class GovType(Enum):
-    ...
-    
-class GovRank(Enum):
     ...
     
 class Tag(Enum):

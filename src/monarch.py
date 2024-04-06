@@ -1,7 +1,8 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from src.leader import Leader
-from src.enums import Culture, Religion
+from src.enums import Culture, Religion, Tag
 from src.date import Date
 
 
@@ -18,4 +19,11 @@ class Monarch():
     religion: Religion
     culture: Culture
     
-    leader: Leader
+    leader: Optional[Leader]
+    
+class Heir(Monarch):
+    claim: int
+    monarch_name: str
+
+class Queen(Monarch):
+    country_of_origin: Tag
