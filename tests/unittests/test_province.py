@@ -1,5 +1,5 @@
 from pathlib import Path
-from src.province import Province, Tag
+from src.province import Province
 import pytest
 
 TEST_PROVINCE = Path("tests/data/test_province.txt")
@@ -9,7 +9,7 @@ TEST_PROVINCE = Path("tests/data/test_province.txt")
 def test_Province():
     test_province = Province.from_txt(TEST_PROVINCE)
 
-    return test_Province
+    return test_province
 
 
 def test_circle_load_Province():
