@@ -11,13 +11,25 @@ from src.enums import Culture, GovType, Religion, Tag, TechGroup
 
 @dataclass
 class CountryEffect:
-    add_prestige: int
-    add_treasury: int
+    add_prestige: Optional[int]
+    add_treasury: Optional[int]
 
     @classmethod
     def from_list_of_lines(cls, lines: list[str])->CountryEffect:
-        ...
+        add_prestige = None
+        add_treasury = None
+        
+        for line in lines:
+            if "add_prestige" in line:
+                add_prestige = int(re.findall(r"= (-*\d+)", line)[0])
+            elif "add_prestige" in line:
+                add_treasury = int(re.findall(r"= (-*\d+)", line)[0])
 
+        return cls(
+            add_prestige = add_prestige,
+            add_treasury = add_treasury,
+        )
+        
 class Country:
     def __init__(
         self,
