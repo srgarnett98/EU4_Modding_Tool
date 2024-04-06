@@ -8,6 +8,9 @@ class GovType(Enum):
     REPUBLIC = "republic"
     THEOCRACY = "theocracy"
     
+class GovReform(Enum):
+    FEUDALISM = "feudalism_reform"
+
 class Tag(Enum):
     SWE = "SWE"
     AKS = "AKS"

@@ -2,24 +2,25 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import re
-from typing import Optional
+from typing import Any, Optional
 from src.date import START_DATE, Date
 from src.monarch import Heir, Monarch, Queen
-from src.enums import Culture, GovType, Religion, Tag, TechGroup
+from src.enums import Culture, GovReform, GovType, Religion, Tag, TechGroup
 
 
-@dataclass
+
 class CountryEffect:
-    date: Date
-    add_prestige: Optional[int]
-    add_treasury: Optional[int]
+    def __init__(self, date: Date, add_prestige: Optional[int], add_treasury: Optional[int]):
+        self.date: Date = date
+        self.add_prestige: Optional[int] = add_prestige
+        self.add_treasury: Optional[int] = add_treasury
 
     @classmethod
-    def from_list_of_lines(cls, lines: list[str])->CountryEffect:
+    def from_list_of_lines(cls, lines: list[str]) -> CountryEffect:
         add_prestige = None
         add_treasury = None
         date = None
-        
+
         for line in lines:
             if re.search(r"1\d\d\d\.\d+\.\d+", line):
                 yr = int(re.findall(r"(\d\d\d\d)\.\d+\.\d+", line)[0])
@@ -31,29 +32,41 @@ class CountryEffect:
             elif "add_treasury" in line:
                 add_treasury = int(re.findall(r"= (-*\d+)", line)[0])
 
-        if date is None: raise ValueError("Date not passed to CountryEffect")
+        if date is None:
+            raise ValueError("Date not passed to CountryEffect")
         return cls(
-            date = date,
-            add_prestige = add_prestige,
-            add_treasury = add_treasury,
+            date=date,
+            add_prestige=add_prestige,
+            add_treasury=add_treasury,
         )
-        
-    def to_txt_block(self)->list[str]:
+
+    def to_txt_block(self) -> list[str]:
         lines = []
-        lines.append(self.date.to_str() + "{\n")
+        lines.append(self.date.to_str() + " = {\n")
         if self.add_prestige is not None:
             lines.append("\tadd_prestige = {}\n".format(self.add_prestige))
         if self.add_treasury is not None:
-            lines.append("\tadd_prestige = {}\n".format(self.add_prestige))
+            lines.append("\tadd_treasury = {}\n".format(self.add_treasury))
         lines.append("}\n")
         return lines
-            
+
+    def __eq__(self, other: CountryEffect | Any):
+        if not isinstance(other, CountryEffect):
+            raise NotImplementedError("Cannot compare CountryEffect with object not of CountryEffect")
+        return (
+            self.date == other.date
+            and self.add_prestige == other.add_prestige
+            and self.add_treasury == other.add_treasury
+        )
+
+
 class Country:
     def __init__(
         self,
         tag: Tag,
         technology_group: TechGroup,
         gov_type: GovType,
+        gov_reform: list[GovReform],
         gov_rank: int,
         primary_culture: Culture,
         religion: Religion,
@@ -73,6 +86,7 @@ class Country:
         self.tag: Tag = tag
         self.technology_group: TechGroup = technology_group
         self.gov_type: GovType = gov_type
+        self.gov_reform = gov_reform
         self.gov_rank: int = gov_rank
         self.primary_culture: Culture = primary_culture
         self.religion: Religion = religion
@@ -106,6 +120,7 @@ class Country:
 
         technology_group = None
         gov_type = None
+        gov_reform: list[GovReform] = []
         gov_rank = None
         primary_culture = None
         religion = None
@@ -127,16 +142,18 @@ class Country:
 
             for i, line in enumerate(lines):
                 match line:
-                    case line if line.startswith("	"):
+                    case line if line.startswith("\t") or line.startswith("}"):
                         pass
                     case line if "technology_group" in line:
                         # finds SWE or F19 from "owner = SWE" or "owner = F19"
                         tech_group_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         technology_group = TechGroup(tech_group_str)
                     case line if "government = " in line:
-                        print(line)
                         gov_type_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         gov_type = GovType(gov_type_str)
+                    case line if "add_government_reform" in line:
+                        gov_reform_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
+                        gov_reform.append(GovReform(gov_reform_str))
                     case line if "government_rank = " in line:
                         gov_rank = int(re.findall(r"= (\d)", line)[0])
                     case line if "primary_culture" in line:
@@ -187,17 +204,21 @@ class Country:
                         tag_str = re.findall(r"= (...)", line)[0]
                         historical_rivals.append(Tag(tag_str))
                     case line if re.search(r"1\d\d\d\.\d+\.\d+", line):
-                        state_lines =[]
+                        state_lines = []
                         j = i
                         while not lines[j].startswith("}"):
                             state_lines.append(lines[j])
                             j += 1
-                        starting_state.append(CountryEffect.from_list_of_lines(state_lines))
+                        starting_state.append(
+                            CountryEffect.from_list_of_lines(state_lines)
+                        )
 
         if technology_group is None:
             raise ValueError("technology_group not found in province.txt")
         if gov_type is None:
             raise ValueError("gov_type not found in province.txt")
+        if len(gov_reform) == 0:
+            raise ValueError("Country needs at least 1 gov reform")
         if gov_rank is None:
             raise ValueError("gov_rank not found in province.txt")
         if primary_culture is None:
@@ -211,6 +232,7 @@ class Country:
             tag=tag,
             technology_group=technology_group,
             gov_type=gov_type,
+            gov_reform=gov_reform,
             gov_rank=gov_rank,
             primary_culture=primary_culture,
             religion=religion,
@@ -228,16 +250,17 @@ class Country:
             starting_state=starting_state,
         )
 
-
     def to_txt(self, filename: Path):
         # lets just assert that you're naming it with the ID in front
         stem = filename.stem
-        tag = re.findall(r'(...)[ ]*-[ ]*', stem)[0]
+        tag = re.findall(r"(...)[ ]*-[ ]*", stem)[0]
         assert Tag(tag) == self.tag
-        
+
         with open(filename, "w") as f:
             f.write("technology_group = {}\n".format(self.technology_group.value))
             f.write("government = {}\n".format(self.gov_type.value))
+            for reform in self.gov_reform:
+                f.write("add_government_reform = {}\n".format(reform.value))
             f.write("government_rank = {}\n".format(str(self.gov_rank)))
             f.write("primary_culture = {}\n".format(self.primary_culture.value))
             f.write("religion = {}\n".format(self.religion.value))
@@ -252,8 +275,10 @@ class Country:
             if self.mercantilism is not None:
                 f.write("mercantilism = {}\n".format(self.mercantilism))
             if self.army_profesh is not None:
-                f.write("add_army_professionalism = {0:.2f}\n".format(self.army_profesh))
-            f.write("capital = {}".format(self.capital))
+                f.write(
+                    "add_army_professionalism = {0:.2f}\n".format(self.army_profesh)
+                )
+            f.write("capital = {}\n".format(self.capital))
             if self.monarch is not None:
                 monarch_block = self.monarch.to_txt_block()
                 for line in monarch_block:

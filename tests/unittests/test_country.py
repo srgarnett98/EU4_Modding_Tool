@@ -15,17 +15,15 @@ def test_Country():
 def test_circle_load_Country():
     test_country = Country.from_txt(TEST_PROVINCE)
 
-    CIRCLE_TEST_PROVINCE_PATH = Path("tests/data/1-circle_country.txt")
+    CIRCLE_TEST_PROVINCE_PATH = Path("tests/data/AKS-circle_country.txt")
+    test_country.to_txt(CIRCLE_TEST_PROVINCE_PATH)
 
-    for key, value in test_country.__dict__.items():
+    circled_country = Country.from_txt(CIRCLE_TEST_PROVINCE_PATH)
+
+    for key in test_country.__dict__.keys():
         print(key)
-        print(value)
-
-    assert False
-    # test_country.to_txt(CIRCLE_TEST_PROVINCE_PATH)
-
-    # circled_country = Country.from_txt(CIRCLE_TEST_PROVINCE_PATH)
-
-    # for key in test_country.__dict__.keys():
-    #     assert test_country.__dict__[key] == circled_country.__dict__[key]
+        if key == "starting_state":
+            print(test_country.__dict__[key][0].__dict__)
+            print(circled_country.__dict__[key][0].__dict__)
+        assert test_country.__dict__[key] == circled_country.__dict__[key]
     
