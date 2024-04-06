@@ -39,6 +39,7 @@ class Building(Enum):
 class Province:
     def __init__(
         self,
+        province_id: int,
         owner: Tag,
         capital: str,
         culture: Culture,
@@ -55,6 +56,7 @@ class Province:
         is_city: bool = True,
         controller: Tag | None = None,
     ):
+        self.province_id: int = province_id
         self.owner: Tag = owner
         self.capital: str = capital
         self.culture: Culture = culture
@@ -82,6 +84,9 @@ class Province:
 
     @classmethod
     def from_txt(cls, filename: Path) -> Province:
+        stem = filename.stem
+        province_id = int(re.findall(r'(\d+)[ ]*-[ ]*', stem)[0])
+        
         owner = None
         capital = None
         culture = None
@@ -169,6 +174,7 @@ class Province:
             raise ValueError("manpower not found in province.txt")
 
         return cls(
+            province_id=province_id,
             owner=owner,
             capital=capital,
             culture=culture,
@@ -187,6 +193,11 @@ class Province:
         )
 
     def to_txt(self, filename: Path):
+        # lets just assert that you're naming it with the ID in front
+        stem = filename.stem
+        province_id = int(re.findall(r'(\d+)[ ]*-[ ]*', stem)[0])
+        assert province_id == self.province_id
+        
         with open(filename, "w") as f:
             f.write("owner = {}\n".format(self.owner.value))
             f.write("controller = {}\n".format(self.controller.value))

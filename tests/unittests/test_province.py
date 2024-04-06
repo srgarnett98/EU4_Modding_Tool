@@ -2,7 +2,7 @@ from pathlib import Path
 from src.province import Province
 import pytest
 
-TEST_PROVINCE = Path("tests/data/test_province.txt")
+TEST_PROVINCE = Path("tests/data/1 - test_province.txt")
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def test_Province():
 def test_circle_load_Province():
     test_province = Province.from_txt(TEST_PROVINCE)
 
-    CIRCLE_TEST_PROVINCE_PATH = Path("tests/data/circle_province.txt")
+    CIRCLE_TEST_PROVINCE_PATH = Path("tests/data/1-circle_province.txt")
 
     test_province.to_txt(CIRCLE_TEST_PROVINCE_PATH)
 
@@ -23,3 +23,4 @@ def test_circle_load_Province():
 
     for key in test_province.__dict__.keys():
         assert test_province.__dict__[key] == circled_province.__dict__[key]
+    
