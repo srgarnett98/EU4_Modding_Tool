@@ -10,10 +10,12 @@ class GovType(Enum):
     
 class Tag(Enum):
     SWE = "SWE"
+    AKS = "AKS"
 
 
 class Culture(Enum):
     SWEDISH = "swedish"
+    CUSTOM1 = "dynamic-beja-somali-sidamo-culture-num1"
 
 
 class CultureGroup(Enum):
@@ -33,6 +35,7 @@ class TradeGood(Enum):
 
 class Religion(Enum):
     CATHOLIC = "catholic"
+    COPTIC = "coptic"
 
 
 class Building(Enum):

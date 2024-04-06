@@ -87,15 +87,15 @@ class Province:
                         capital = re.findall(r'= "([a-zA-Z\d ]+)"', line)[0]
                     case line if "culture" in line:
                         # finds swedish from "culture = swedish"
-                        culture_str = re.findall(r"= ([a-zA-Z_-]+)", line)[0]
+                        culture_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         culture = Culture(culture_str)
                     case line if "trade_goods" in line:
                         # finds grain from trade_goods = grain
-                        goods_str = re.findall(r"= ([a-zA-Z_-]+)", line)[0]
+                        goods_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         trade_goods = TradeGood(goods_str)
                     case line if "religion" in line:
                         # finds catholic from "religion = catholic"
-                        religion_str = re.findall(r"= ([a-zA-Z_-]+)", line)[0]
+                        religion_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         religion = Religion(religion_str)
                     case line if "base_tax" in line:
                         # finds 4 from base_tax = 4
@@ -110,7 +110,7 @@ class Province:
                         # finds 2 from center_of_trade = 2
                         center_of_trade = int(re.findall(r"= (\d+)", line)[0])
                     case line if "discovered_by" in line:
-                        group_str = re.findall(r"= ([a-zA-Z_-]+)", line)[0]
+                        group_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         discovered_by.append(CultureGroup(group_str))
                     case line if "hre" in line:
                         hre = "yes" in line

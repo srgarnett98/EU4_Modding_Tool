@@ -3,9 +3,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 from typing import Optional
-from date import START_DATE, Date
+from src.date import START_DATE, Date
 from src.monarch import Heir, Monarch, Queen
-from src.province import Province
 from src.enums import Culture, GovType, Religion, Tag, TechGroup
 
 
@@ -22,7 +21,7 @@ class CountryEffect:
         for line in lines:
             if "add_prestige" in line:
                 add_prestige = int(re.findall(r"= (-*\d+)", line)[0])
-            elif "add_prestige" in line:
+            elif "add_treasury" in line:
                 add_treasury = int(re.findall(r"= (-*\d+)", line)[0])
 
         return cls(
@@ -112,18 +111,19 @@ class Country:
                         pass
                     case line if "technology_group" in line:
                         # finds SWE or F19 from "owner = SWE" or "owner = F19"
-                        tech_group_str = re.findall(r"= ([a-zA-Z_-\d]+)", line)[0]
+                        tech_group_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         technology_group = TechGroup(tech_group_str)
                     case line if "government = " in line:
-                        gov_type_str = re.findall(r"= ([a-zA-Z_-\d]+)", line)[0]
+                        print(line)
+                        gov_type_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         gov_type = GovType(gov_type_str)
                     case line if "government_rank = " in line:
                         gov_rank = int(re.findall(r"= (\d)", line)[0])
                     case line if "primary_culture" in line:
-                        culture_str = re.findall(r"= ([a-zA-Z_-\d]+)", line)[0]
+                        culture_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         primary_culture = Culture(culture_str)
                     case line if "religion" in line:
-                        religion_str = re.findall(r"= ([a-zA-Z_-\d]+)", line)[0]
+                        religion_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         religion = Religion(religion_str)
                     case line if "capital" in line:
                         capital = int(re.findall(r"= (\d+)", line)[0])
@@ -154,11 +154,11 @@ class Country:
                         army_profesh = float(re.findall(r"= (\d*.*\d*)", line)[0])
                     case line if "add_accepted_culture" in line:
                         # finds swedish from "culture = swedish"
-                        culture_str = re.findall(r"= ([a-zA-Z_-\d]+)", line)[0]
+                        culture_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         accepted_cultures.append(Culture(culture_str))
                     case line if "remove_accepted_culture" in line:
                         # finds swedish from "culture = swedish"
-                        culture_str = re.findall(r"= ([a-zA-Z_-\d]+)", line)[0]
+                        culture_str = re.findall(r"= ([a-zA-Z_\-\d]+)", line)[0]
                         removed_cultures.append(Culture(culture_str))
                     case line if "historical_friend" in line:
                         tag_str = re.findall(r"= (...)", line)[0]
