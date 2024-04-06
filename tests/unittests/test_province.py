@@ -21,5 +21,3 @@ def test_circle_load_Province():
     
     for key in test_province.__dict__.keys():
         assert test_province.__dict__[key] == circled_province.__dict__[key]
-    
-    

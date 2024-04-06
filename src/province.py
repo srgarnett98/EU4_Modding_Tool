@@ -48,7 +48,7 @@ class Province:
         production: int,
         manpower: int,
         discovered_by: list[CultureGroup],
-        centre_of_trade: int | None = None,
+        center_of_trade: int | None = None,
         hre: bool = False,
         add_cores: list[Tag] | None = None,  # type: ignore
         buildings: list[Building] | None = None,  # type: ignore
@@ -65,9 +65,9 @@ class Province:
         self.manpower: int = manpower
         self.discovered_by: list[CultureGroup] = discovered_by
 
-        if centre_of_trade is None:
-            centre_of_trade = 0
-        self.centre_of_trade: int = centre_of_trade
+        if center_of_trade is None:
+            center_of_trade = 0
+        self.center_of_trade: int = center_of_trade
         self.hre: bool = hre
         if add_cores is None:
             add_cores: list[Tag] = []
@@ -90,8 +90,8 @@ class Province:
         tax = None
         production = None
         manpower = None
-        centre_of_trade = None
-        centre_of_trade: int | None
+        center_of_trade = None
+        center_of_trade: int | None = None
         discovered_by: list[CultureGroup] = []
         hre: bool = False
         add_cores: list[Tag] = []
@@ -132,9 +132,9 @@ class Province:
                     case line if "base_manpower" in line:
                         # finds 4 from base_manpower = 4
                         manpower = int(re.findall(r"= (\d+)", line)[0])
-                    case line if "centre_of_trade" in line:
-                        # finds 2 from centre_of_trade = 2
-                        centre_of_trade = int(re.findall(r"= (\d+)", line)[0])
+                    case line if "center_of_trade" in line:
+                        # finds 2 from center_of_trade = 2
+                        center_of_trade = int(re.findall(r"= (\d+)", line)[0])
                     case line if "discovered_by" in line:
                         group_str = re.findall(r"= ([a-zA-Z_]+)", line)[0]
                         discovered_by.append(CultureGroup(group_str))
@@ -167,23 +167,23 @@ class Province:
             raise ValueError("production not found in province.txt")
         if manpower is None:
             raise ValueError("manpower not found in province.txt")
-
+        
         return cls(
-            owner,
-            capital,
-            culture,
-            trade_goods,
-            religion,
-            tax,
-            production,
-            manpower,
-            discovered_by,
-            centre_of_trade,
-            hre,
-            add_cores,
-            buildings,
-            is_city,
-            controller,
+            owner = owner,
+            capital = capital,
+            culture = culture,
+            trade_goods = trade_goods,
+            religion = religion,
+            tax = tax,
+            production = production,
+            manpower = manpower,
+            discovered_by = discovered_by,
+            center_of_trade = center_of_trade,
+            hre = hre,
+            add_cores = add_cores,
+            buildings = buildings,
+            is_city = is_city,
+            controller = controller,
         )
 
     def to_txt(self, filename: Path):
@@ -202,8 +202,8 @@ class Province:
             f.write("base_tax = {}\n".format(str(self.tax)))
             f.write("base_production = {}\n".format(str(self.production)))
             f.write("base_manpower = {}\n".format(str(self.manpower)))
-            if self.centre_of_trade > 0:
-                f.write("center_of_trade = {}\n".format(str(self.centre_of_trade)))
+            if self.center_of_trade > 0:
+                f.write("center_of_trade = {}\n".format(str(self.center_of_trade)))
             for tag in self.add_cores:
                 f.write("add_core = {}\n".format(tag.value))
             for group in self.discovered_by:
