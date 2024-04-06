@@ -25,6 +25,9 @@ class Monarch():
     @classmethod
     def from_list_of_lines(cls, lines: list[str])->Monarch:
         ...
+        
+    def to_txt_block(self)->list[str]:
+        ...
     
 class Heir(Monarch):
     claim: int
