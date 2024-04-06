@@ -49,8 +49,8 @@ class Province:
         discovered_by: list[CultureGroup],
         centre_of_trade: int | None = None,
         hre: bool = False,
-        add_cores: list[Tag] | None = None, # type: ignore
-        buildings: list[Building] | None = None, # type: ignore
+        add_cores: list[Tag] | None = None,  # type: ignore
+        buildings: list[Building] | None = None,  # type: ignore
         is_city: bool = True,
         controller: Tag | None = None,
     ):
@@ -97,10 +97,10 @@ class Province:
         buildings: list[Building] = []
         is_city: bool = True
         controller: Tag | None = None
-        
-        with open(filename, "r") as f:            
+
+        with open(filename, "r") as f:
             lines = f.readlines()
-            
+
             for line in lines:
                 match line:
                     case line if "owner" in line:
@@ -112,30 +112,30 @@ class Province:
                         capital = re.findall(r'= "([a-zA-Z\d ]+)"', line)[0]
                     case line if "culture" in line:
                         # finds swedish from "culture = swedish"
-                        culture_str = re.findall(r'= ([a-zA-Z_]+)', line)[0]
+                        culture_str = re.findall(r"= ([a-zA-Z_]+)", line)[0]
                         culture = Culture(culture_str)
                     case line if "trade_goods" in line:
                         # finds grain from trade_goods = grain
-                        goods_str = re.findall(r'= ([a-zA-Z_]+)', line)[0]
+                        goods_str = re.findall(r"= ([a-zA-Z_]+)", line)[0]
                         trade_goods = TradeGood(goods_str)
                     case line if "religion" in line:
                         # finds catholic from "religion = catholic"
-                        religion_str = re.findall(r'= ([a-zA-Z_]+)', line)[0]
+                        religion_str = re.findall(r"= ([a-zA-Z_]+)", line)[0]
                         religion = Religion(religion_str)
                     case line if "base_tax" in line:
                         # finds 4 from base_tax = 4
-                        tax = int(re.findall(r'= (\d+)', line)[0])
+                        tax = int(re.findall(r"= (\d+)", line)[0])
                     case line if "base_production" in line:
                         # finds 4 from base_production = 4
-                        production = int(re.findall(r'= (\d+)', line)[0])
+                        production = int(re.findall(r"= (\d+)", line)[0])
                     case line if "base_manpower" in line:
                         # finds 4 from base_manpower = 4
-                        manpower = int(re.findall(r'= (\d+)', line)[0])
+                        manpower = int(re.findall(r"= (\d+)", line)[0])
                     case line if "centre_of_trade" in line:
                         # finds 2 from centre_of_trade = 2
-                        centre_of_trade = int(re.findall(r'= (\d+)', line)[0])
+                        centre_of_trade = int(re.findall(r"= (\d+)", line)[0])
                     case line if "discovered_by" in line:
-                        group_str = re.findall(r'= ([a-zA-Z_]+)', line)[0]
+                        group_str = re.findall(r"= ([a-zA-Z_]+)", line)[0]
                         discovered_by.append(CultureGroup(group_str))
                     case line if "hre" in line:
                         hre = "yes" in line
@@ -149,16 +149,24 @@ class Province:
                     case line if "controller" in line:
                         controller_str = owner_str = re.findall(r"= (...)", line)[0]
                         controller = Tag(controller_str)
-                        
-        if owner is None: raise ValueError("owner not found in province.txt")
-        if capital is None: raise ValueError("capital not found in province.txt")
-        if culture is None: raise ValueError("culture not found in province.txt")
-        if trade_goods is None: raise ValueError("trade_goods not found in province.txt")
-        if religion is None: raise ValueError("religion not found in province.txt")
-        if tax is None: raise ValueError("tax not found in province.txt")
-        if production is None: raise ValueError("production not found in province.txt")
-        if manpower is None: raise ValueError("manpower not found in province.txt")
-        
+
+        if owner is None:
+            raise ValueError("owner not found in province.txt")
+        if capital is None:
+            raise ValueError("capital not found in province.txt")
+        if culture is None:
+            raise ValueError("culture not found in province.txt")
+        if trade_goods is None:
+            raise ValueError("trade_goods not found in province.txt")
+        if religion is None:
+            raise ValueError("religion not found in province.txt")
+        if tax is None:
+            raise ValueError("tax not found in province.txt")
+        if production is None:
+            raise ValueError("production not found in province.txt")
+        if manpower is None:
+            raise ValueError("manpower not found in province.txt")
+
         return cls(
             owner,
             capital,
@@ -177,3 +185,28 @@ class Province:
             controller,
         )
 
+    def to_txt(self, filename: Path):
+        with open(filename, "w") as f:
+            f.write("owner = {}\n".format(self.owner.value))
+            f.write("controller = {}\n".format(self.controller.value))
+            f.write('capital = "{}"\n'.format(self.capital))
+            f.write(
+                "is_city = {}\n".format("yes" * self.is_city + "no" * (not self.is_city))
+            )
+            f.write("culture = {}\n".format(self.culture.value))
+            f.write("religion = {}\n".format(self.religion.value))
+            f.write("trade_goods = {}\n".format(self.trade_goods.value))
+            if Building.LVL2_FORT in self.buildings:
+                f.write("{} = yes\n".format(Building.LVL2_FORT.value))
+            f.write("base_tax = {}\n".format(str(self.tax)))
+            f.write("base_production = {}\n".format(str(self.production)))
+            f.write("base_manpower = {}\n".format(str(self.manpower)))
+            if self.centre_of_trade > 0:
+                f.write("center_of_trade = {}\n".format(str(self.centre_of_trade)))
+            for tag in self.add_cores:
+                f.write("add_core = {}\n".format(tag.value))
+            for group in self.discovered_by:
+                f.write("discovered_by = {}\n".format(group.value))
+            if self.hre:
+                f.write("hre = yes")
+            
